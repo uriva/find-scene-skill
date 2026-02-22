@@ -9,11 +9,20 @@ Search and download movie/TV show scenes by dialog, time, or visual description.
 
 ## Authentication
 
-Every API request requires a `_token` field in the JSON body. The token is obtained from the find-scene bot (Telegram or web chat at https://find-scene.com).
+Every API request requires a `_token` field in the JSON body.
 
 ```json
 { "_token": "user-api-token", ...other fields }
 ```
+
+### How to get a token
+
+1. Go to https://find-scene.com and sign in
+2. In the chat, ask the bot to "generate an API token"
+3. The bot will return a token string — keep it secret
+4. Include it as `_token` in every API request body
+
+To revoke a token, ask the bot to "revoke my API token".
 
 ## Base URL
 
