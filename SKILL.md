@@ -32,7 +32,9 @@ https://api.find-scene.com
 
 All endpoints are `POST` with `Content-Type: application/json`, except `GET /api/operation/{id}`.
 
-## Core Concepts
+## Response Format
+
+All successful responses are wrapped in `{ "result": <structured object> }`. Each endpoint returns a typed JSON object (not a plain string). Error responses use `{ "error": "message" }` at the top level (HTTP 4xx/5xx) or `{ "result": { "error": "message" } }` for domain-level errors within a 200 response.
 
 ### Video Source Hash
 
@@ -147,7 +149,7 @@ Get the best video source for a movie or TV show.
 
 - `query` (required): Video query object (see above)
 - `timeoutSeconds` (optional): Max wait time. Default 60. Do not manually convert minutes to seconds.
-- Returns: `{ "result": "videoHash string" }`
+- Returns: `{ "result": { "sources": ["videoHash1", ...], "error": "..." } }` — `sources` is always present; `error` is optional
 
 #### `POST /api/youtube_url_to_video_source`
 
@@ -164,7 +166,7 @@ Convert a YouTube URL to a video source hash.
 
 - `url` (required): Full YouTube URL
 - `startTime`, `endTime` (optional): Time bounds
-- Returns: `{ "result": "videoHash string" }`
+- Returns: `{ "result": { "videoSource": "hashString" } }`
 
 ### Text Source Tools
 
@@ -184,7 +186,7 @@ Get a text/subtitle source hash by movie details. Less accurate timing than `get
 - `query` (required): Video query object
 - `language` (optional): Subtitle language, e.g. "en", "pt-br", "de"
 - `minDuration` (optional): Minimum subtitle file duration in seconds
-- Returns: `{ "result": "textSource hash string" }`
+- Returns: `{ "result": { "textSources": ["hash1", ...] } }` or `{ "result": { "error": "..." } }`
 
 #### `POST /api/get_high_accuracy_text_source`
 
@@ -202,7 +204,7 @@ Get a text source with accurate timing. Requires a videoHash from `get_best_vide
 - `query` (required): Video query object
 - `videoHash` (required): From `get_best_video_source`
 - `language` (optional): Subtitle language
-- Returns: `{ "result": "textSource hash string" }`
+- Returns: `{ "result": { "textSources": ["hash1", ...] } }` or `{ "result": { "error": "..." } }`
 
 ### Text Search Tools
 
@@ -228,7 +230,7 @@ Search for a phrase/quote in a text source's subtitles.
 - `phraseSearchParams.phraseEnd` (optional): End of phrase if split
 - `phraseSearchParams.nSkip` (required): Results to skip (default 0)
 - `phraseSearchParams.maxOccurrences` (required): Max results (default 1)
-- Returns: `{ "result": "match details with timestamps" }`
+- Returns: `{ "result": { "occurrences": [{ "time": "HH:MM:SS", "rangeStart": "HH:MM:SS", "rangeEnd": "HH:MM:SS", "srt": "subtitle text" }, ...] } }` or `{ "result": { "error": "..." } }`
 
 #### `POST /api/get_srt_entries_around_phrase`
 
@@ -247,6 +249,7 @@ Get subtitle entries in a time window around a phrase occurrence.
 ```
 
 All fields are required.
+- Returns: same as `search_phrase` — `{ "result": { "occurrences": [...] } }` or `{ "result": { "error": "..." } }`
 
 #### `POST /api/get_srt_entries_by_time_range`
 
@@ -265,6 +268,7 @@ Get subtitle entries for a video within a time range.
 - `videoQuery` (required): Video query object
 - `startTime`, `endTime` (required): Time range in HH:MM:SS
 - `subsLanguage` (optional): Subtitle language
+- Returns: `{ "result": { "srt": "subtitle text" } }` or `{ "result": { "error": "..." } }`
 
 ### Video Download Tools
 
@@ -293,7 +297,7 @@ Schedule a video clip download. Returns an operation ID, NOT a URL.
 - `displayParams` (required): See display params object above
 - `textSource` (optional): To burn subtitles into the clip
 - `srtOffset` (optional): Subtitle time correction offset
-- Returns: `{ "result": "operation ID" }` -- you MUST poll this
+- Returns: `{ "result": { "operationId": "..." } }` or `{ "result": { "error": "..." } }` — you MUST poll the operationId
 
 #### `POST /api/extract_frame`
 
@@ -320,7 +324,7 @@ Extract a single frame/screenshot from a video. Returns an operation ID.
 - `textSource` (optional): Overlay subtitles on frame
 - `overrideTextTop`, `overrideTextBottom` (optional): Custom text overlay (meme mode)
 - `displayParams` (optional): See display params object
-- Returns: `{ "result": "operation ID" }` -- you MUST poll this
+- Returns: `{ "result": { "operationId": "..." } }` or `{ "result": { "error": "..." } }` — you MUST poll the operationId
 
 #### `POST /api/cancel_operation`
 
@@ -329,6 +333,8 @@ Cancel a stuck async operation.
 ```json
 { "_token": "...", "id": "operation-id" }
 ```
+
+- Returns: `{ "result": { "cancelled": true, "operationId": "..." } }` or `{ "result": { "cancelled": false, "reason": "..." } }`
 
 ### Async Operation Polling
 
@@ -367,6 +373,7 @@ Get movie/show information from IMDB.
 
 - `title` (required): Movie/show title
 - All other fields optional
+- Returns: `{ "result": { "name": "...", "imdb": "tt...", "year": 1999, "season": 1, "episode": 1, ... } }` — movie metadata object with available IMDB fields
 
 #### `POST /api/is_string_a_movie_name`
 
@@ -376,6 +383,8 @@ Check if a string is a movie/show name.
 { "_token": "...", "string": "The Matrix" }
 ```
 
+- Returns: `{ "result": { "isMovieName": true } }` or `{ "result": { "isMovieName": false } }`
+
 #### `POST /api/quote_to_movie`
 
 Identify which movie a quote is from.
@@ -383,6 +392,8 @@ Identify which movie a quote is from.
 ```json
 { "_token": "...", "quote": "I know kung fu" }
 ```
+
+- Returns: `{ "result": { "candidates": ["Movie Name 1", "Movie Name 2", ...] } }`
 
 #### `POST /api/popular_quotes_from_title`
 
@@ -400,6 +411,7 @@ Get popular quotes from a movie or TV show.
 - `name` (required): Movie/show name
 - `limit` (required): Max number of quotes
 - `imdb` (optional): IMDB ID
+- Returns: `{ "result": { "quotes": ["quote 1", "quote 2", ...] } }`
 
 #### `POST /api/compute_running_time`
 
@@ -408,6 +420,8 @@ Get running time of a movie/show.
 ```json
 { "_token": "...", "imdbId": "tt0133093" }
 ```
+
+- Returns: `{ "result": { "runtimeSeconds": 8160 } }` or `{ "result": { "runtimeSeconds": null } }` if not found
 
 ### TV Series Tools
 
@@ -432,6 +446,7 @@ Find which episode of a TV series contains a phrase.
 - `videoQuery` (required): Must include `name`. Can include `imdb`, `season`, `episode`, `year`, `seasonEnd`, `episodeEnd`, `dubbed`, `animated`, `blackAndWhite`
 - `season` (optional): Limit search to specific season
 - `limit` (optional): Max results
+- Returns: `{ "result": { "episodes": [{ "season": 3, "episode": 15, "context": ["surrounding subtitle lines", ...] }, ...] } }`
 
 ### Scene Description Search
 
@@ -455,6 +470,7 @@ Search for a scene by visual description (not dialog).
 - `nResults` (required): Number of results to return
 - `nSkip` (optional): Skip results (for pagination / "show me another")
 - `scoreThreshold` (optional): Minimum similarity score 0-1. Use ~0.6 for specific scenes, ~0.3 for vague descriptions.
+- Returns: `{ "result": { "results": [{ "query": { "movieOrTVShowName": "...", ... }, "time": "HH:MM:SS", "score": 0.85 }, ...], "warning": "..." } }` or `{ "result": { "error": "..." } }`
 
 #### `POST /api/request_indexing_for_scene_description`
 
@@ -473,6 +489,7 @@ Request that a movie/show be indexed for scene description search. Use when `fin
 
 - `video.name` (required): Movie/show name
 - Other fields optional: `imdb`, `season`, `episode`, `year`, `seasonEnd`, `episodeEnd`, `dubbed`, `animated`, `blackAndWhite`
+- Returns: `{ "result": { "requested": true } }`
 
 ### Transcription
 
@@ -491,6 +508,8 @@ Transcribe a video segment (max 2 minutes).
 
 All fields required. `videoHash` from `get_best_video_source`.
 
+- Returns: `{ "result": { "srt": "subtitle text in SRT format" } }` or `{ "result": { "error": "..." } }`
+
 ### Account
 
 #### `POST /api/check_quota`
@@ -500,6 +519,8 @@ Check remaining search credits for the current month.
 ```json
 { "_token": "..." }
 ```
+
+- Returns: `{ "result": { "creditsRemaining": 42 } }`
 
 ## Error Handling
 
