@@ -38,7 +38,7 @@ All successful responses are wrapped in `{ "result": <structured object> }`. Eac
 
 ### Video Source Hash
 
-An internal find-scene ID for a video file. Obtained from `get_best_video_source` or `youtube_url_to_video_source`. This is NOT an IMDB ID or filename. Required for downloads, frame extraction, and high-accuracy text source lookups.
+An internal find-scene ID for a video file. Obtained from `get_best_video_source`. This is NOT an IMDB ID or filename. Required for downloads, frame extraction, and high-accuracy text source lookups.
 
 ### Text Source Hash
 
@@ -150,23 +150,6 @@ Get the best video source for a movie or TV show.
 - `query` (required): Video query object (see above)
 - `timeoutSeconds` (optional): Max wait time. Default 60. Do not manually convert minutes to seconds.
 - Returns: `{ "result": { "sources": ["videoHash1", ...], "error": "..." } }` — `sources` is always present; `error` is optional
-
-#### `POST /api/youtube_url_to_video_source`
-
-Convert a YouTube URL to a video source hash.
-
-```json
-{
-  "_token": "...",
-  "url": "https://youtube.com/watch?v=...",
-  "startTime": "00:01:30",
-  "endTime": "00:02:00"
-}
-```
-
-- `url` (required): Full YouTube URL
-- `startTime`, `endTime` (optional): Time bounds
-- Returns: `{ "result": { "videoSource": "hashString" } }`
 
 ### Text Source Tools
 
