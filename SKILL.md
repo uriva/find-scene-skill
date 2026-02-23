@@ -476,23 +476,6 @@ Request that a movie/show be indexed for scene description search. Use when `fin
 
 ### Transcription
 
-#### `POST /api/transcribe_by_time`
-
-Transcribe a video segment (max 2 minutes).
-
-```json
-{
-  "_token": "...",
-  "videoHash": "abc123...",
-  "startTime": "00:30:00",
-  "endTime": "00:31:00"
-}
-```
-
-All fields required. `videoHash` from `get_best_video_source`.
-
-- Returns: `{ "result": { "srt": "subtitle text in SRT format" } }` or `{ "result": { "error": "..." } }`
-
 ### Account
 
 #### `POST /api/check_quota`
