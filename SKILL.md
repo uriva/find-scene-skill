@@ -46,9 +46,26 @@ An internal find-scene ID for a subtitle/text file. Obtained from `get_text_sour
 
 ### Async Operations
 
-`download_by_time` and `extract_frame` return an operation ID (not a download URL). You must poll `GET /api/operation/{id}` until status is `completed`, then use the `url` field from the response.
+`download_by_time`, `extract_frame`, `stitch_videos` and `transcribe_by_time` return an operation ID (not a download URL). You must poll `GET /api/operation/{id}` until status is `completed`, then use the `url` field from the response.
 
 **Statuses:** `in_progress`, `completed`, `failed`, `cancelled`
+
+#### `POST /api/transcribe_by_time`
+
+Transcribe a segment of a video by time (max 2 minutes). Returns an operation ID. Once completed, the result will contain the transcription text.
+
+```json
+{
+  "_token": "...",
+  "videoHash": "abc123...",
+  "startTime": "00:30:00",
+  "endTime": "00:30:15"
+}
+```
+
+- `videoHash` (required): From `get_best_video_source`
+- `startTime`, `endTime` (required): Clip bounds in HH:MM:SS
+- Returns: `{ "result": { "operationId": "..." } }` or `{ "result": { "error": "..." } }` — you MUST poll the operationId
 
 ### Video Query Object
 
@@ -282,6 +299,26 @@ Schedule a video clip download. Returns an operation ID, NOT a URL.
 - `srtOffset` (optional): Subtitle time correction offset
 - Returns: `{ "result": { "operationId": "..." } }` or `{ "result": { "error": "..." } }` — you MUST poll the operationId
 
+#### `POST /api/stitch_videos`
+
+Stitch multiple previously downloaded video clips into a single video. Returns an operation ID.
+
+```json
+{
+  "_token": "...",
+  "urls": ["https://...", "https://..."],
+  "displayParams": {
+    "removeWatermark": false,
+    "gif": false,
+    "mobile": false
+  }
+}
+```
+
+- `urls` (required): Array of video URLs to stitch together in order. These should be URLs from completed download_by_time operations.
+- `displayParams` (required): See display params object above
+- Returns: `{ "result": { "operationId": "..." } }` or `{ "result": { "error": "..." } }` — you MUST poll the operationId
+
 #### `POST /api/extract_frame`
 
 Extract a single frame/screenshot from a video. Returns an operation ID.
@@ -498,7 +535,7 @@ Check remaining search credits for the current month.
 
 - Always get the video source hash first before attempting downloads or text source lookups.
 - Use `get_high_accuracy_text_source` (with videoHash) over `get_text_source` when you have a video source, for better subtitle timing alignment.
-- The `download_by_time` and `extract_frame` results are operation IDs. Never return these to the user as download links. Always poll until you get the actual URL.
+- The `download_by_time`, `extract_frame`, `stitch_videos` and `transcribe_by_time` results are operation IDs. Never return these to the user as download links. Always poll until you get the actual URL.
 - Keep clip durations reasonable (under 60 seconds) to avoid long processing times.
 - For TV series, use `find_episode_by_phrase` first to identify the episode before searching within it.
 - The `find_by_scene_description` endpoint requires the video to have been indexed. If it returns no results, use `request_indexing_for_scene_description` and try again later.
