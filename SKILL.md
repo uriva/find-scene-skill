@@ -387,7 +387,7 @@ Find a series episode by a phrase. This is not for movies, but tv shows.
 | `phrase` | string | required | The quote or phrase to search for |
 | `videoQuery` | object | required | The TV show to search in. Must include 'name' (the show title). |
 | `season` | number | optional | Narrow search to a specific season |
-| `limit` | number | optional |  |
+| `limit` | number | required |  |
 
 **Response:** `{ "episodes": object[] }`
 
@@ -432,7 +432,7 @@ Search scene by non dialog description.
 | `description` | string | required | a description of what happens in the scene, if provided by the user. do not include the movie or tv show name here. |
 | `video` | any | optional |  |
 | `nResults` | number | required |  |
-| `nSkip` | number | optional | skip this amount of results, e.g. if user requested the next result, or another one. |
+| `nSkip` | number | required | skip this amount of results, e.g. if user requested the next result, or another one. |
 | `scoreThreshold` | number | optional | minimum similarity score (0-1) to include a result. use higher values (e.g. 0.6) for specific scenes, lower (e.g. 0.3) for vague descriptions. |
 
 **Response:** `{ "results": object[], "warning": string }` or `{ "error": string }`
