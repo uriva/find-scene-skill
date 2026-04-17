@@ -27,11 +27,12 @@ Every API request requires a `_token` field in the JSON body.
 ### How to get a token
 
 1. Go to https://find-scene.com and sign in
-2. In the chat, ask the bot to "generate an API token"
-3. The bot will return a token string — keep it secret
+2. Open https://find-scene.com/settings
+3. Click "Generate new token" — the token is shown once, so copy it immediately
 4. Include it as `_token` in every API request body
 
-To revoke a token, ask the bot to "revoke my API token".
+To revoke a token, go to https://find-scene.com/settings and click "Revoke" next
+to the token you want to disable.
 
 ## Response Format
 
