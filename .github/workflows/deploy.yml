@@ -1,0 +1,17 @@
+name: Deploy Tank Skill
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tank CLI
+        run: sudo curl -fsSL https://raw.githubusercontent.com/tankpkg/tank/main/install.sh | sudo sh
+      - name: Publish to Tank Registry
+        env:
+          TANK_TOKEN: ${{ secrets.TANK_TOKEN }}
+        run: tank publish
