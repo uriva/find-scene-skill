@@ -286,7 +286,7 @@ Schedules a task to download a video part by time. The result will be automatica
 | `srtOffset` | number | optional | If you need to correct for time in the subs file, give the offset here. |
 | `videoHash` | string | required | An internal find-scene.com id of the video source (not an imdb id or a filename). This will be in the output of the get_best_video_source tool. |
 | `textSource` | string | optional | Internal find-scene id of a text source. Not a filename or an imdb id. It can be got using the get_high_accuracy_text_source tool. |
-| `displayParams` | object | required |  |
+| `displayParams` | object | optional |  |
 
 **Response:** `{ "operationId": string }` or `{ "error": string }`
 
